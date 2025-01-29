@@ -3,8 +3,6 @@ package blocks
 import (
 	"scratcheditor/utils"
 	"time"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type OnGrabFunc func(e EventGrab)
@@ -19,26 +17,29 @@ func OnGrab(f OnGrabFunc, debounce float64) {
 	onGrabDebounce = debounce
 }
 
-func handleOnGrab(b *Block, cursor utils.Vector) *time.Time {
+func handleOnGrab(b *Block, cursor *utils.Cursor) {
 	if b.IsGrabbed {
-		return nil
+		return
+	}
+	pos := cursor.GetPosition()
+	if !b.BoundingBox.IsWithin(b.Position, pos) || !cursor.JustPressedLMB() {
+		return
 	}
 
-	if !b.BoundingBox.IsWithin(cursor) || !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		return nil
-	}
-
-	b.IsGrabbed = true
-	if onGrabFunc == nil {
-		return nil
-	}
 	now := time.Now()
+	b.IsGrabbed = true
+	b.grabWhen = now
+	cursor.Grabbed = b.UID
+	b.GrabOffset = pos.Sub(b.Position)
+	if onGrabFunc == nil {
+		return
+	}
 	onGrabFunc(EventGrab{
 		EventOps: EventOps{
 			Block: b,
 			When:  now,
 		},
-		Cursor: cursor,
+		CursorPosition: pos,
+		Offset:         b.GrabOffset,
 	})
-	return &now
 }

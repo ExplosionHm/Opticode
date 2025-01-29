@@ -2,7 +2,6 @@ package blocks
 
 import (
 	"scratcheditor/utils"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -19,21 +18,22 @@ func WhileGrab(f WhileGrabFunc, debounce float64) {
 	whileGrabDebounce = debounce
 }
 
-func handlewhileGrab(b *Block, cursor utils.Vector, when time.Time) {
+func handlewhileGrab(b *Block, cursor *utils.Cursor) {
 	if !b.IsGrabbed {
 		return
 	}
 
 	if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		handleOffGrab(b, cursor, when)
+		handleOffGrab(b, cursor)
 		return
 	}
 
 	whileGrabFunc(EventGrab{
 		EventOps: EventOps{
 			Block: b,
-			When:  when,
+			When:  b.grabWhen,
 		},
-		Cursor: cursor,
+		CursorPosition: cursor.GetPosition(),
+		Offset:         b.GrabOffset,
 	})
 }

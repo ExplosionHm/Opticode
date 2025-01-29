@@ -15,6 +15,6 @@ func NewBox(x1, y1, x2, y2 float64) Box {
 	}
 }
 
-func (b *Box) IsWithin(v Vector) bool {
-	return v.X >= b.X1 && v.X <= b.X2 && v.Y >= b.Y1 && v.Y <= b.Y2
+func (b *Box) IsWithin(o Vector, v Vector) bool {
+	return v.X >= o.X+b.X1 && v.X <= o.X+b.X2 && v.Y >= o.Y+b.Y1 && v.Y <= o.Y+b.Y2
 }

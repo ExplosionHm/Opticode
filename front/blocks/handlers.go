@@ -3,8 +3,6 @@ package blocks
 import (
 	"scratcheditor/utils"
 	"time"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // Define base struct for other events to in inherient
@@ -17,24 +15,26 @@ type EventOps struct {
 // Event Grab parameters
 type EventGrab struct {
 	EventOps
-	Cursor utils.Vector
-	DeltaX float64 //! Implement
-	DeltaY float64 //! Implement
+	CursorPosition utils.Vector
+	Offset         utils.Vector
+	DeltaX         float64 //! Implement
+	DeltaY         float64 //! Implement
 }
 
-var (
-	grabWhen time.Time
-)
-
-func Handle() {
-	cX, cY := ebiten.CursorPosition()
-	cursor := utils.Vector{X: float64(cX), Y: float64(cY)}
-
+// Loops through all the blocks in the scene and handles all the events
+func Handle(csr *utils.Cursor) {
 	for i := 0; i < len(Blocks); i++ {
 		b := Blocks[i]
-		if t := handleOnGrab(b, cursor); t != nil {
-			grabWhen = *t
+		// < ------- Handle Grabbing
+		if b.Grabbable {
+			if csr.Grabbed == 0 {
+				handleOnGrab(b, csr)
+			}
+			if csr.Grabbed == b.UID {
+				handlewhileGrab(b, csr)
+			}
 		}
-		handlewhileGrab(b, cursor, grabWhen)
+		// > ------- End of Handle Grabbing
+
 	}
 }

@@ -3,23 +3,31 @@ package blocks
 import (
 	"image/color"
 	"log"
+	"math/rand"
 	"scratcheditor/utils"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const (
-	MaxBlocks = 128
+	MaxBlocks = 9000
 )
+
+var ()
 
 type Block struct {
 	Type        uint8
 	Color       uint32
+	UID         uint32
 	Position    utils.Vector
 	BoundingBox utils.Box
 
-	IsGrabbed bool
+	Grabbable  bool
+	IsGrabbed  bool
+	GrabOffset utils.Vector
+	grabWhen   time.Time
 }
 
 type BlockDrawOptions interface {
@@ -41,6 +49,8 @@ func NewBlock(t uint8, color uint32) *Block {
 		Type:        t,
 		Color:       color,
 		Position:    utils.Vector{X: 0, Y: 0},
+		Grabbable:   true,
+		UID:         rand.Uint32(),
 		BoundingBox: utils.NewBox(0, 0, 100, 50),
 	}
 	appendBlock(b)
@@ -61,7 +71,11 @@ func (b *Block) Draw(image *ebiten.Image, op BlockDrawOptions) {
 }
 
 func Render(image *ebiten.Image) {
-	for i := 0; i < len(Blocks); i++ {
+	/* for i := 0; i < len(Blocks); i++ {
+		Blocks[i].Draw(image, nil)
+	} */
+
+	for i := len(Blocks) - 1; i >= 0; i-- {
 		Blocks[i].Draw(image, nil)
 	}
 }

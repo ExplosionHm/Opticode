@@ -2,7 +2,6 @@ package blocks
 
 import (
 	"scratcheditor/utils"
-	"time"
 )
 
 type OffGrabFunc func(e EventGrab)
@@ -17,16 +16,17 @@ func OffGrab(f OffGrabFunc, debounce float64) {
 	offGrabDebounce = debounce
 }
 
-func handleOffGrab(b *Block, cursor utils.Vector, when time.Time) {
+func handleOffGrab(b *Block, cursor *utils.Cursor) {
 	b.IsGrabbed = false
 	if offGrabFunc == nil {
 		return
 	}
+	cursor.Grabbed = 0
 	offGrabFunc(EventGrab{
 		EventOps: EventOps{
 			Block: b,
-			When:  when,
+			When:  b.grabWhen,
 		},
-		Cursor: cursor,
+		CursorPosition: cursor.GetPosition(),
 	})
 }
