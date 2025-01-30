@@ -2,6 +2,7 @@ package svg
 
 import (
 	"encoding/xml"
+	"image/color"
 )
 
 type SVG struct {
@@ -11,11 +12,26 @@ type SVG struct {
 	Elements    []interface{}
 }
 
+type Style struct {
+	Method     uint16
+	Parameters []interface{}
+}
+
 type XML struct {
 	XMLName  xml.Name `xml:"svg"`
 	Width    string   `xml:"width,attr"`
 	Height   string   `xml:"height,attr"`
 	InnerXML []byte   `xml:",innerxml"`
+}
+
+type PElement struct {
+	ID         string
+	Class      string
+	Style      []Style
+	Fill       color.Color
+	Stroke     string
+	Opacity    string
+	Visibility string
 }
 
 type Element struct {
@@ -31,16 +47,6 @@ type Element struct {
 type PathElement struct {
 	Element
 	D string `xml:"d,attr"`
-}
-
-type RectElement struct {
-	Element
-	X      string `xml:"x,attr"`
-	Y      string `xml:"y,attr"`
-	Width  string `xml:"width,attr"`
-	Height string `xml:"height,attr"`
-	RX     string `xml:"rx,attr,omitempty"`
-	RY     string `xml:"ry,attr,omitempty"`
 }
 
 type CircleElement struct {
