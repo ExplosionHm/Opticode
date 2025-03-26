@@ -51,7 +51,7 @@ func ParseSVG(_xml XML) (*SVG, error) {
 		return nil, err
 	}
 
-	elements := []interface{}{}
+	elements := []ElementData{}
 	definitions := make(map[string]interface{})
 	inDefs := false
 
@@ -70,61 +70,65 @@ func ParseSVG(_xml XML) (*SVG, error) {
 			switch element.Name.Local {
 			case "defs":
 				inDefs = true
-			case "rect":
-				var rect RectElement
+			/* case "rect":
+				var rect RawRectElement
 				decoder.DecodeElement(&rect, &element)
 				if inDefs {
-					definitions[rect.ID] = rect
+					definitions[rect.ID()] = rect
 				} else {
 					elements = append(elements, rect)
 				}
 			case "circle":
-				var circle CircleElement
+				var circle RawCircleElement
 				decoder.DecodeElement(&circle, &element)
 				if inDefs {
-					definitions[circle.ID] = circle
+					definitions[circle.ID()] = circle
 				} else {
 					elements = append(elements, circle)
 				}
 			case "ellipse":
-				var ellipse EllipseElement
+				var ellipse RawEllipseElement
 				decoder.DecodeElement(&ellipse, &element)
 				if inDefs {
-					definitions[ellipse.ID] = ellipse
+					definitions[ellipse.ID()] = ellipse
 				} else {
 					elements = append(elements, ellipse)
 				}
 			case "line":
-				var line LineElement
+				var line RawLineElement
 				decoder.DecodeElement(&line, &element)
 				if inDefs {
-					definitions[line.ID] = line
+					definitions[line.ID()] = line
 				} else {
 					elements = append(elements, line)
 				}
 			case "polygon":
-				var polygon PolygonElement
+				var polygon RawPolygonElement
 				decoder.DecodeElement(&polygon, &element)
 				if inDefs {
-					definitions[polygon.ID] = polygon
+					definitions[polygon.ID()] = polygon
 				} else {
 					elements = append(elements, polygon)
 				}
 			case "polyline":
-				var polyline PolylineElement
+				var polyline RawPolylineElement
 				decoder.DecodeElement(&polyline, &element)
 				if inDefs {
-					definitions[polyline.ID] = polyline
+					definitions[polyline.ID()] = polyline
 				} else {
 					elements = append(elements, polyline)
-				}
+				} */
 			case "path":
-				var path PathElement
+				var path RawPathElement
 				decoder.DecodeElement(&path, &element)
+				pe, err := path.Parse()
+				if err != nil {
+					return nil, err
+				}
 				if inDefs {
-					definitions[path.ID] = path
+					definitions[path.ID()] = pe
 				} else {
-					elements = append(elements, path)
+					elements = append(elements, pe)
 				}
 			}
 		case xml.EndElement:

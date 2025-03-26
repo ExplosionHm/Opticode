@@ -1,20 +1,46 @@
 package svg
 
 import (
+	"hash/fnv"
 	"image/color"
 	"log"
 	"scratcheditor/utils"
-	"strconv"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 var (
-	colors = map[string]color.Color{
-		"blue": color.RGBA{0, 0, 255, 255},
+	colors = map[string]color.RGBA{
+		"blue": {0, 0, 255, 255},
+		"red":  {255, 0, 0, 255},
 	}
 )
+
+func GetColorFromString(s string) color.RGBA {
+	if c, ok := colors[s]; ok {
+		return c
+	}
+	// convert unknown string to color
+
+	n := strings.ToLower(strings.ReplaceAll(s, " ", ""))
+
+	h := fnv.New32a()
+	h.Write([]byte(n))
+	hash := h.Sum32()
+	log.Println(color.RGBA{
+		R: uint8((hash >> 16) & 0xFF),
+		G: uint8((hash >> 8) & 0xFF),
+		B: uint8(hash & 0xFF),
+		A: 255,
+	})
+	return color.RGBA{
+		R: uint8((hash >> 16) & 0xFF),
+		G: uint8((hash >> 8) & 0xFF),
+		B: uint8(hash & 0xFF),
+		A: 255,
+	}
+}
 
 func (s *SVG) Draw(screen *ebiten.Image, vec utils.Vector) {
 	for i, e := range s.Elements {
@@ -23,29 +49,9 @@ func (s *SVG) Draw(screen *ebiten.Image, vec utils.Vector) {
 			continue
 		}
 		switch ele := e.(type) {
-		case RectElement:
-			x, err := strconv.ParseFloat(ele.X, 64)
-			if err != nil {
-				log.Println("ERROR CONVERTING", x)
-				return
-			}
-			y, err := strconv.ParseFloat(ele.Y, 64)
-			if err != nil {
-				log.Println("ERROR CONVERTING", y)
-				return
-			}
-			w, err := strconv.ParseFloat(ele.Width, 64)
-			if err != nil {
-				log.Println("ERROR CONVERTING", w)
-				return
-			}
-			h, err := strconv.ParseFloat(ele.Height, 64)
-			if err != nil {
-				log.Println("ERROR CONVERTING", h)
-				return
-			}
-			ebitenutil.DrawRect(screen, vec.X+x, vec.Y+y, w, h, colors[ele.Fill])
-		case PolylineElement:
+		case *PathElement:
+			ele.Draw(screen, s.Definitions)
+		/* case PolylineElement:
 			log.Println(ele)
 		case PolygonElement:
 			log.Println(ele)
@@ -56,7 +62,7 @@ func (s *SVG) Draw(screen *ebiten.Image, vec utils.Vector) {
 		case EllipseElement:
 			log.Println(ele)
 		case CircleElement:
-			log.Println(ele)
+			log.Println(ele) */
 		default:
 			log.Println("UNKNOWN:", e)
 		}

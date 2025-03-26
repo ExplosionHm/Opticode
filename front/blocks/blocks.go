@@ -24,6 +24,7 @@ type Block struct {
 	Position    utils.Vector
 	BoundingBox utils.Box
 
+	Properties map[string]any
 	Grabbable  bool
 	IsGrabbed  bool
 	GrabOffset utils.Vector
@@ -50,6 +51,7 @@ func NewBlock(t uint8, color uint32) *Block {
 		Color:       color,
 		Position:    utils.Vector{X: 0, Y: 0},
 		Grabbable:   true,
+		Properties:  make(map[string]any),
 		UID:         rand.Uint32(),
 		BoundingBox: utils.NewBox(0, 0, 100, 50),
 	}

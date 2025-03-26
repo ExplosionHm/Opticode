@@ -1,0 +1,5 @@
+<svg width="1500" height="650" xmlns="http://www.w3.org/2000/svg">
+  <path fill="red" stroke="blue" stroke-width="15" d="M 50,450
+           C 150,450 125,50 250,50
+           S 350,450 450,450" />
+</svg>

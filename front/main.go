@@ -15,7 +15,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-type Game struct {
+type Editor struct {
 	Block  *blocks.Block
 	Cursor *utils.Cursor
 	Test   *svg.SVG
@@ -23,7 +23,7 @@ type Game struct {
 
 var l = time.Now()
 
-func (g *Game) Update() error {
+func (g *Editor) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeySpace) && time.Since(l).Seconds() > 0.0 {
 		cx, cy := ebiten.CursorPosition()
 		blocks.NewBlock(0, rand.Uint32()).Position.Set(float64(cx), float64(cy))
@@ -36,7 +36,7 @@ func (g *Game) Update() error {
 
 var offset = utils.Vector{}
 
-func (g *Game) Draw(screen *ebiten.Image) {
+func (g *Editor) Draw(screen *ebiten.Image) {
 	blocks.Render(screen)
 
 	cx, cy := ebiten.CursorPosition()
@@ -44,11 +44,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	vector.StrokeLine(screen, 0, 0, float32(cx), float32(cy), 1, color.RGBA{255, 0, 0, 255}, true)
 	g.Test.Draw(screen, utils.Vector{X: float64(cx), Y: float64(cy)})
 
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("Fps: %.2f\nBlock: X: %.2f, Y: %.2f | %t | Offset: X: %.2f, Y: %.2f\nCursor: %d\nTotal Blocks: %d", ebiten.ActualFPS(), g.Block.Position.X, g.Block.Position.Y, g.Block.IsGrabbed, offset.X, offset.Y, g.Cursor.Grabbed, len(blocks.Blocks)))
+	debug := fmt.Sprintf("Fps: %.2f\nBlock: X: %.2f, Y: %.2f | %t | Offset: X: %.2f, Y: %.2f\nCursor: %d\nTotal Blocks: %d", ebiten.ActualFPS(), g.Block.Position.X, g.Block.Position.Y, g.Block.IsGrabbed, offset.X, offset.Y, g.Cursor.Grabbed, len(blocks.Blocks))
+	_, y := ebiten.WindowSize()
+	ebitenutil.DebugPrintAt(screen, debug, 0, y-100)
 }
 
-func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return ebiten.WindowSize()
+func (g *Editor) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return outsideWidth, outsideHeight
 }
 
 func main() {
@@ -82,13 +84,21 @@ func main() {
 			log.Println("UNKNOWN:", e)
 		}
 	} */
-	re := `<svg width="300" height="130" xmlns="http://www.w3.org/2000/svg">
-  <rect width="200" height="100" x="10" y="10" rx="20" ry="20" fill="blue" />
-</svg>`
-	s, err := svg.Load([]byte(re))
+	/* re := `<svg width="300" height="130" xmlns="http://www.w3.org/2000/svg">
+	  <path
+	    fill="red"
+	    stroke="blue"
+	    d="M 10,90
+	           C 30,90 25,10 50,10
+	           S 70,90 90,90" />
+	</svg>
+	` */
+	//<rect width="200" height="100" x="10" y="10" rx="20" ry="20" fill="blue" />
+	s, err := svg.LoadFromFile("svgtest.svg")
 	if err != nil {
 		log.Println(err)
 	}
+
 	blocks.OnGrab(func(e blocks.EventGrab) {
 		log.Println("Grabbed")
 		offset = e.Offset
@@ -98,6 +108,7 @@ func main() {
 	blocks.WhileGrab(func(e blocks.EventGrab) {
 		//log.Println("Grabbing", time.Since(e.When).Seconds(), e.Offset)
 		e.Block.Position.Set(e.CursorPosition.X-e.Offset.X, e.CursorPosition.Y-e.Offset.Y)
+		log.Println(e.CursorPosition)
 	}, 0.1)
 
 	blocks.OffGrab(func(e blocks.EventGrab) {
@@ -110,7 +121,7 @@ func main() {
 	ebiten.SetVsyncEnabled(false)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetWindowTitle("GoScratch")
-	if err := ebiten.RunGame(&Game{
+	if err := ebiten.RunGame(&Editor{
 		Block:  blocks.NewBlock(0, 0xff4fd3),
 		Cursor: &utils.Cursor{},
 		Test:   s,

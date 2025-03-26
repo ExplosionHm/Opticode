@@ -1,7 +1,7 @@
 package svg
 
-type RectElement struct {
-	Element
+type RawRectElement struct {
+	RawElement
 	X      string `xml:"x,attr"`
 	Y      string `xml:"y,attr"`
 	Width  string `xml:"width,attr"`
